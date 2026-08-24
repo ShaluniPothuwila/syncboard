@@ -17,8 +17,8 @@ export const initialData = {
     { date: "Aug 21", title: "API Integration", color: "border-amber-500" },
     { date: "Aug 22", title: "Write Documentation", color: "border-blue-500" },
     { date: "Aug 23", title: "Create Test Cases", color: "border-purple-500" },
+    { date: "Aug 24", title: "QA Testing Pass", color: "border-emerald-500" },
   ],
-  { date: "Aug 24", title: "QA Testing Pass", color: "border-emerald-500" },
   columns: [
     {
       id: "col-1",
@@ -176,3 +176,4 @@ export const initialData = {
     },
   ],
 };
+ 
