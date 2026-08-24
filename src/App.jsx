@@ -6,6 +6,7 @@ import { DragDropContext } from "@hello-pangea/dnd";
 
 export default function App() {
   const [data, setData] = useState(initialData);
+// Live Search : Filter tasks across all columns as the user types
   const [searchQuery, setSearchQuery] = useState("");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
