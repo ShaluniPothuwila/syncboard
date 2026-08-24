@@ -36,6 +36,7 @@ export default function App() {
   //ADD/EDIT TASK
   const handleSubmit = (e) => {
     e.preventDefault();
+   // Validation: prevent submitting a task with an empty title
     if (!form.title.trim()) return;
 
     if (editingTask) {
