@@ -1,12 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { initialData } from "./mockData";
 import Column from "./components/Column";
 import Sidebar from "./components/Sidebar";
 import { DragDropContext } from "@hello-pangea/dnd";
+import { useAuth } from "./context/AuthContext";
+import LoginForm from "./components/LoginForm";
+import { getBoard, createTask, updateTask, deleteTask, moveTask } from "./api/board";
+
+// The API returns plain category/priority strings, not the Tailwind
+// classes the UI needs - these lookup tables fill that gap.
+const CATEGORY_COLORS = {
+  "UI/UX": "bg-purple-100 text-purple-700",
+  Backend: "bg-blue-100 text-blue-700",
+  Frontend: "bg-sky-100 text-sky-700",
+  Docs: "bg-emerald-100 text-emerald-700",
+  Testing: "bg-indigo-100 text-indigo-700",
+  Setup: "bg-emerald-100 text-emerald-700",
+  Research: "bg-emerald-100 text-emerald-700",
+};
+const PRIORITY_COLORS = {
+  High: "bg-red-100 text-red-600",
+  Medium: "bg-amber-100 text-amber-700",
+  Low: "bg-slate-100 text-slate-600",
+};
+const DEFAULT_AVATAR = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100";
+
+function enrichColumns(columns) {
+  return columns.map((col) => ({
+    ...col,
+    tasks: col.tasks.map((task) => ({
+      ...task,
+      categoryColor: CATEGORY_COLORS[task.category] || "bg-slate-100 text-slate-600",
+      priorityColor: PRIORITY_COLORS[task.priority] || "bg-slate-100 text-slate-600",
+      assignee:
+        initialData.team.find((m) => m.name === task.assignee)?.avatar || DEFAULT_AVATAR,
+    })),
+  }));
+}
 
 export default function App() {
-  const [data, setData] = useState(initialData);
-// Live Search : Filter tasks across all columns as the user types
+  const { user, logout } = useAuth();
+
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -19,6 +56,46 @@ export default function App() {
     priority: "Medium",
     dueDate: "",
   });
+
+  // Fetch the real board once we know we're logged in.
+  useEffect(() => {
+    if (!user) return;
+    refreshBoard();
+  }, [user]);
+
+  async function refreshBoard() {
+    try {
+      setLoading(true);
+      setErrorMsg("");
+      const board = await getBoard();
+      setData({ ...board, columns: enrichColumns(board.columns) });
+    } catch (err) {
+      setErrorMsg(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Not logged in yet -> show the login/register screen instead of the board.
+  if (!user) {
+    return <LoginForm />;
+  }
+
+  if (loading && !data) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-slate-400 text-sm">
+        Loading your board...
+      </div>
+    );
+  }
+
+  if (errorMsg && !data) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-500 text-sm">
+        {errorMsg}
+      </div>
+    );
+  }
 
   //SEARCH FILTER
   const filteredColumns = data.columns.map((col) => ({
@@ -34,41 +111,32 @@ export default function App() {
   };
 
   //ADD/EDIT TASK
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-   // Validation: prevent submitting a task with an empty title
     if (!form.title.trim()) return;
 
-    if (editingTask) {
-      //EDIT TASK
-      setData((prev) => ({
-        ...prev,
-        columns: prev.columns.map((col) => ({
-          ...col,
-          tasks: col.tasks.map((t) =>
-            t.id === editingTask.id ? { ...t, ...form } : t
-          ),
-        })),
-      }));
-    } else {
-      //ADD TASK
-      const newTask = {
-        id: Date.now().toString(),
-        ...form,
-        categoryColor: "bg-sky-100 text-sky-700",
-        priorityColor: "bg-amber-100 text-amber-700",
-        assignee:
-          "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100",
-      };
-
-      setData((prev) => ({
-        ...prev,
-        columns: prev.columns.map((col) =>
-          col.id === "col-1"
-            ? { ...col, tasks: [newTask, ...col.tasks] }
-            : col
-        ),
-      }));
+    try {
+      if (editingTask) {
+        await updateTask(editingTask.id, {
+          title: form.title,
+          description: form.description,
+          category: form.category,
+          priority: form.priority,
+          dueDate: form.dueDate,
+        }, editingTask.version);
+      } else {
+        await createTask({
+          columnId: "col-1",
+          title: form.title,
+          description: form.description,
+          category: form.category,
+          priority: form.priority,
+          dueDate: form.dueDate,
+        });
+      }
+      await refreshBoard();
+    } catch (err) {
+      alert(err.message); // e.g. a 409 conflict if someone else edited it first
     }
 
     //reset
@@ -85,14 +153,13 @@ export default function App() {
   };
 
   //DELETE
-  const handleDelete = (taskId) => {
-    setData((prev) => ({
-      ...prev,
-      columns: prev.columns.map((col) => ({
-        ...col,
-        tasks: col.tasks.filter((t) => t.id !== taskId),
-      })),
-    }));
+  const handleDelete = async (taskId) => {
+    try {
+      await deleteTask(taskId);
+      await refreshBoard();
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
   //EDIT
@@ -103,8 +170,8 @@ export default function App() {
   };
 
   //DRAG AND DROP HANDLER
-  const onDragEnd = (result) => {
-    const { destination, source } = result;
+  const onDragEnd = async (result) => {
+    const { destination, source, draggableId } = result;
     if (!destination) return;
     if (
       destination.droppableId === source.droppableId &&
@@ -112,38 +179,30 @@ export default function App() {
     ) {
       return;
     }
-    const sourceColIndex = data.columns.findIndex(
-      (col) => col.id === source.droppableId
-    );
-    const destColIndex = data.columns.findIndex(
-      (col) => col.id === destination.droppableId
-    );
+
+    // Optimistic UI update so the drag feels instant...
+    const sourceColIndex = data.columns.findIndex((col) => col.id === source.droppableId);
+    const destColIndex = data.columns.findIndex((col) => col.id === destination.droppableId);
     const sourceCol = data.columns[sourceColIndex];
     const destCol = data.columns[destColIndex];
 
-    if (source.droppableId === destination.droppableId) {
-      const newTasks = Array.from(sourceCol.tasks);
-      const [movedTask] = newTasks.splice(source.index, 1);
-      newTasks.splice(destination.index, 0, movedTask);
-
-      const newColumns = [...data.columns];
-      newColumns[sourceColIndex] = { ...sourceCol, tasks: newTasks };
-
-      setData((prev) => ({ ...prev, columns: newColumns }));
-      return;
-    }
-	
     const sourceTasks = Array.from(sourceCol.tasks);
-    const destTasks = Array.from(destCol.tasks);
-
     const [movedTask] = sourceTasks.splice(source.index, 1);
+    const destTasks = source.droppableId === destination.droppableId ? sourceTasks : Array.from(destCol.tasks);
     destTasks.splice(destination.index, 0, movedTask);
 
     const newColumns = [...data.columns];
     newColumns[sourceColIndex] = { ...sourceCol, tasks: sourceTasks };
     newColumns[destColIndex] = { ...destCol, tasks: destTasks };
-
     setData((prev) => ({ ...prev, columns: newColumns }));
+
+    // ...then confirm it with the server. If it fails, refetch to undo.
+    try {
+      await moveTask(draggableId, destination.droppableId, destination.index);
+    } catch (err) {
+      alert(err.message);
+      refreshBoard();
+    }
   };
 
   return (
@@ -164,7 +223,7 @@ export default function App() {
               {data.boardName}
             </h1>
             <p className="text-[11px] text-slate-400">
-              Project Task Management
+              {data.subtitle}
             </p>
           </div>
         </div>
@@ -193,10 +252,16 @@ export default function App() {
             + Add Task
           </button>
 
-          {/* NOTIFICATION */}
-          <button className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-xs">
-            🔔
-          </button>
+          {/* USER + LOGOUT */}
+          <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
+            <span className="text-xs text-slate-500 font-medium">{user.name}</span>
+            <button
+              onClick={logout}
+              className="text-xs text-slate-400 hover:text-red-500"
+            >
+              Log out
+            </button>
+          </div>
         </div>
       </header>
 
@@ -218,9 +283,9 @@ export default function App() {
 
           {/* SIDEBAR */}
           <Sidebar
-            stats={data.stats}
-            team={data.team}
-            upcomingDeadlines={data.upcomingDeadlines}
+            stats={initialData.stats}
+            team={initialData.team}
+            upcomingDeadlines={initialData.upcomingDeadlines}
           />
         </main>
       </DragDropContext>
