@@ -1,5 +1,11 @@
 import { Draggable } from "@hello-pangea/dnd";
 
+function formatDueDate(dueDate) {
+  if (!dueDate) return "No date";
+  const date = new Date(dueDate);
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
 export default function TaskCard({ task, index, onDelete, onEdit }) { 
   return ( 
     <Draggable draggableId={task.id} index={index}>
@@ -65,7 +71,7 @@ export default function TaskCard({ task, index, onDelete, onEdit }) {
     
             <div className="flex items-center gap-2"> 
               <span className="text-slate-400 text-[11px] font-medium flex items-center gap-1"> 
-                📅 {task.dueDate} 
+                📅 {formatDueDate(task.dueDate)} 
               </span> 
               <img 
                 src={task.assignee} 

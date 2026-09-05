@@ -4,6 +4,7 @@ import {
   updateTask,
   moveTask,
   deleteTask,
+  getTaskStats,
 } from "../models/Task.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
@@ -19,7 +20,10 @@ export const addTask = asyncHandler(async (req, res) => {
     return res.status(400).json({ error: "columnId and title are required" });
   }
 
-  const task = await createTask({ columnId, title, description, category, priority, dueDate, assignee });
+  const task = await createTask({
+    columnId, title, description, category, priority, dueDate, assignee,
+    createdBy: req.user._id,
+  });
   res.status(201).json(task);
 });
 
@@ -52,4 +56,9 @@ export const removeTask = asyncHandler(async (req, res) => {
   const deleted = await deleteTask(id);
   if (!deleted) return res.status(404).json({ error: "Task not found" });
   res.status(204).send();
+});
+
+export const getStats = asyncHandler(async (req, res) => {
+  const stats = await getTaskStats();
+  res.json(stats);
 });
