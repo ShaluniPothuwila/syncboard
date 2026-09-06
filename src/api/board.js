@@ -4,6 +4,10 @@ export async function getBoard() {
   return apiFetch("/board");
 }
 
+export async function getStats() {
+  return apiFetch("/stats");
+}
+
 export async function createTask(taskData) {
   return apiFetch("/tasks", {
     method: "POST",
