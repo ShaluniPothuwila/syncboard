@@ -7,6 +7,7 @@ import {
   getTaskStats,
 } from "../models/Task.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { broadcastBoardChanged } from "../realtime/io.js";
 
 export const getBoard = asyncHandler(async (req, res) => {
   const board = await getBoardWithTasks();
@@ -24,6 +25,8 @@ export const addTask = asyncHandler(async (req, res) => {
     columnId, title, description, category, priority, dueDate, assignee,
     createdBy: req.user._id,
   });
+
+  broadcastBoardChanged({ type: "created", task });
   res.status(201).json(task);
 });
 
@@ -34,6 +37,7 @@ export const editTask = asyncHandler(async (req, res) => {
   const task = await updateTask(id, updates, version);
   if (!task) return res.status(404).json({ error: "Task not found" });
 
+  broadcastBoardChanged({ type: "updated", task });
   res.json(task);
 });
 
@@ -48,6 +52,7 @@ export const moveTaskHandler = asyncHandler(async (req, res) => {
   const task = await moveTask(id, { columnId, index });
   if (!task) return res.status(404).json({ error: "Task not found" });
 
+  broadcastBoardChanged({ type: "moved", task });
   res.json(task);
 });
 
@@ -55,6 +60,8 @@ export const removeTask = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const deleted = await deleteTask(id);
   if (!deleted) return res.status(404).json({ error: "Task not found" });
+
+  broadcastBoardChanged({ type: "deleted", taskId: id });
   res.status(204).send();
 });
 

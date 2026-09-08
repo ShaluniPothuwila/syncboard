@@ -1,16 +1,11 @@
-const BASE_URL = "http://localhost:4000/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
-// Reads the saved login token, if any.
+export const SOCKET_URL = BASE_URL.replace(/\/api\/?$/, "");
+
 function getToken() {
   return localStorage.getItem("syncboard_token");
 }
 
-/**
- * Thin wrapper around fetch that:
- * - prefixes every call with the API base URL
- * - attaches the JWT automatically if we're logged in
- * - parses JSON and throws a real Error on non-2xx responses
- */
 export async function apiFetch(path, options = {}) {
   const token = getToken();
 
@@ -23,7 +18,6 @@ export async function apiFetch(path, options = {}) {
     },
   });
 
-  // DELETE requests return no body (204 No Content)
   const isEmpty = res.status === 204;
   const data = isEmpty ? null : await res.json();
 

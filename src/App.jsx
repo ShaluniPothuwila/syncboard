@@ -17,6 +17,7 @@ import {
   getPendingActions,
   clearPendingActions,
 } from "./offline/localDB";
+import { connectSocket, disconnectSocket } from "./realtime/socket";
 
 const CATEGORY_COLORS = {
   "UI/UX": "bg-purple-100 text-purple-700",
@@ -76,6 +77,24 @@ export default function App() {
       syncPendingActions();
     }
   }, [isOnline]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const socket = connectSocket();
+    const handleBoardChanged = () => {
+      if (navigator.onLine) {
+        refreshBoard();
+      }
+    };
+
+    socket.on("board:changed", handleBoardChanged);
+
+    return () => {
+      socket.off("board:changed", handleBoardChanged);
+      disconnectSocket();
+    };
+  }, [user]);
 
   async function loadFromCacheThenServer() {
     const cached = await getBoardSnapshot();
