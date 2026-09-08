@@ -3,6 +3,14 @@ Base URL: `http://localhost:4000/api`
 All request/response bodies are JSON. Protected routes require:
 
 ---
+Health
+`GET /health`
+Simple uptime/status check, no authentication required. Used by hosting platforms (Render/Railway) and Docker's HEALTHCHECK to confirm the service is running.
+Response `200`
+```json
+{ "status": "ok" }
+```
+---
 Auth
 `POST /auth/register`
 Create a new account.
