@@ -3,6 +3,8 @@ import { initialData } from "./mockData";
 import Column from "./components/Column";
 import Sidebar from "./components/Sidebar";
 import ConflictModal from "./components/ConflictModal";
+import Button from "./components/Button";
+import { LogoutIcon } from "./components/icons";
 import { DragDropContext } from "@hello-pangea/dnd";
 import { useAuth } from "./context/AuthContext";
 import LoginForm from "./components/LoginForm";
@@ -64,14 +66,11 @@ export default function App() {
   const [conflict, setConflict] = useState(null);
   const [form, setForm] = useState(emptyForm);
 
-  // On login, render from local cache immediately (instant, works offline),
-  // then try to refresh from the real server in the background.
   useEffect(() => {
     if (!user) return;
     loadFromCacheThenServer();
   }, [user]);
 
-  // Whenever we come back online, sync any queued offline changes.
   useEffect(() => {
     if (isOnline && user) {
       syncPendingActions();
@@ -109,8 +108,6 @@ export default function App() {
       setStats(mappedStats);
       await saveBoardSnapshot(board, mappedStats);
     } catch (err) {
-      // Network failed - fall back silently to whatever's cached/in state.
-      // The offline banner (driven by isOnline) tells the user what's going on.
       if (!data) {
         const cached = await getBoardSnapshot();
         if (cached) {
@@ -207,8 +204,6 @@ export default function App() {
     };
 
     if (!isOnline) {
-      // Queue the action and apply an optimistic local update so the
-      // board still feels responsive while offline.
       if (editingTask) {
         await addPendingAction({ type: "update", taskId: editingTask.id, payload, version: editingTask.version });
         setData((prev) => ({
@@ -389,18 +384,15 @@ export default function App() {
             <span className="absolute left-2.5 top-2 text-slate-400 text-xs">🔍</span>
           </div>
 
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3.5 py-2 rounded-lg font-bold"
-          >
+          <Button variant="primary" size="sm" onClick={() => setIsModalOpen(true)}>
             + Add Task
-          </button>
+          </Button>
 
           <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
             <span className="text-xs text-slate-500 font-medium">{user.name}</span>
-            <button onClick={logout} className="text-xs text-slate-400 hover:text-red-500">
+            <Button variant="ghost" size="sm" icon={<LogoutIcon />} onClick={logout}>
               Log out
-            </button>
+            </Button>
           </div>
         </div>
       </header>
@@ -455,12 +447,12 @@ export default function App() {
                 className="border p-2 text-sm"
               />
               <div className="flex justify-end gap-2 mt-2">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="text-sm">
+                <Button type="button" variant="ghost" size="sm" onClick={() => setIsModalOpen(false)}>
                   Cancel
-                </button>
-                <button type="submit" className="bg-indigo-600 text-white px-3 py-1 text-sm rounded">
+                </Button>
+                <Button type="submit" variant="primary" size="sm">
                   Save
-                </button>
+                </Button>
               </div>
             </form>
           </div>

@@ -1,4 +1,6 @@
 import { Draggable } from "@hello-pangea/dnd";
+import Button from "./Button";
+import { EditIcon, TrashIcon } from "./icons";
 
 function formatDueDate(dueDate) {
   if (!dueDate) return "No date";
@@ -16,7 +18,6 @@ export default function TaskCard({ task, index, onDelete, onEdit }) {
           {...provided.dragHandleProps}
           className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs hover:shadow-md transition-all"
         > 
-          {/* TOP SECTION */}
           <div className="flex items-start justify-between gap-2 mb-1.5"> 
             
             <div className="flex items-start gap-2">
@@ -30,30 +31,21 @@ export default function TaskCard({ task, index, onDelete, onEdit }) {
               </h4> 
             </div>
 
-            {/* ACTION BUTTONS */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => onEdit(task)}
-                className="text-xs text-blue-500 hover:underline"
-              >
+            <div className="flex gap-1.5 shrink-0">
+              <Button variant="ghost" size="sm" icon={<EditIcon />} onClick={() => onEdit(task)}>
                 Edit
-              </button>
+              </Button>
 
-              <button
-                onClick={() => onDelete(task.id)}
-                className="text-xs text-red-500 hover:underline"
-              >
+              <Button variant="danger" size="sm" icon={<TrashIcon />} onClick={() => onDelete(task.id)}>
                 Delete
-              </button>
+              </Button>
             </div>
           </div> 
     
-          {/* DESCRIPTION */}
           <p className="text-slate-500 text-xs mb-3 line-clamp-2">
             {task.description}
           </p> 
     
-          {/* FOOTER */}
           <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100"> 
             
             <div className="flex items-center gap-1.5 flex-wrap"> 

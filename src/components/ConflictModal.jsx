@@ -1,3 +1,5 @@
+import Button from "./Button";
+
 export default function ConflictModal({ myChanges, serverTask, onKeepMine, onUseServer, onCancel }) {
   const fields = ["title", "description", "category", "priority", "dueDate"];
 
@@ -32,21 +34,15 @@ export default function ConflictModal({ myChanges, serverTask, onKeepMine, onUse
         </div>
 
         <div className="flex justify-end gap-2">
-          <button onClick={onCancel} className="text-xs text-slate-500 px-3 py-1.5">
+          <Button variant="ghost" size="sm" onClick={onCancel}>
             Cancel
-          </button>
-          <button
-            onClick={onUseServer}
-            className="text-xs border border-slate-300 px-3 py-1.5 rounded"
-          >
+          </Button>
+          <Button variant="secondary" size="sm" onClick={onUseServer}>
             Discard mine, keep server's
-          </button>
-          <button
-            onClick={onKeepMine}
-            className="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded font-bold"
-          >
+          </Button>
+          <Button variant="primary" size="sm" onClick={onKeepMine}>
             Overwrite with mine
-          </button>
+          </Button>
         </div>
       </div>
     </div>
