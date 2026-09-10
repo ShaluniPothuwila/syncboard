@@ -24,14 +24,20 @@ Plan tasks across **To Do**, **In Progress**, and **Done** columns, drag and dro
 
 ## Project Structure
 collabboard/
-├── src/ # React frontend
-│ ├── main.jsx
-│ ├── App.jsx
-│ ├── api/ # fetch wrappers for the backend (auth, board/tasks)
-│ ├── context/AuthContext.jsx
-│ ├── components/
-│ ├── offline/ # localDB.js (PouchDB cache/queue), useOnlineStatus.js
-│ └── mockData.js # still used for sidebar team info, not tasks
+├── client/ # React frontend
+│ ├── src/
+│ │ ├── main.jsx
+│ │ ├── App.jsx
+│ │ ├── api/ # fetch wrappers for the backend (auth, board/tasks)
+│ │ ├── context/AuthContext.jsx
+│ │ ├── components/
+│ │ ├── realtime/socket.js # Socket.IO client
+│ │ ├── offline/ # localDB.js (PouchDB cache/queue), useOnlineStatus.js
+│ │ └── mockData.js # still used for sidebar team info, not tasks
+│ ├── tests/ # Vitest + React Testing Library
+│ ├── Dockerfile # multi-stage build -> nginx
+│ ├── nginx.conf
+│ └── package.json
 ├── server/ # Express backend
 │ ├── src/
 │ │ ├── index.js # entry point
@@ -43,10 +49,14 @@ collabboard/
 │ │ │ └── Task.js
 │ │ ├── controllers/ # authController.js, taskController.js
 │ │ ├── routes/
+│ │ ├── realtime/io.js # Socket.IO server
 │ │ └── middleware/ # JWT auth check, error handling
+│ ├── tests/ # Jest + Supertest
 │ ├── docs/ # API.md (full API contract), Postman collection
+│ ├── Dockerfile
 │ └── package.json
-└── package.json # frontend
+├── docker-compose.yml # runs client + server together
+└── .env.example # env vars docker-compose interpolates
 
 
 ## Getting Started
@@ -89,8 +99,9 @@ Leave this terminal running.
 
 ### 3. Set up and run the frontend
 
-Open a **second terminal**, from the project root:
+Open a **second terminal**, from the `client` folder:
 ```bash
+cd client
 npm install
 npm run dev
 ```
@@ -105,7 +116,7 @@ Both servers need to be running at the same time for the app to work. Log in wit
 
 ## Other Scripts
 
-**Frontend** (from project root):
+**Frontend** (from `client/`):
 ```bash
 npm run build     # production build
 npm run preview   # preview the production build locally
