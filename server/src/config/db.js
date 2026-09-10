@@ -3,8 +3,7 @@ import { config } from "./config.js";
 
 export async function connectDB() {
   if (!config.mongoUri) {
-    console.error("MONGO_URI is not set in .env — cannot connect to MongoDB.");
-    process.exit(1);
+    throw new Error("MONGO_URI is not set — cannot connect to MongoDB.");
   }
 
   try {
@@ -12,6 +11,6 @@ export async function connectDB() {
     console.log("MongoDB connected successfully");
   } catch (err) {
     console.error("MongoDB connection failed:", err.message);
-    process.exit(1);
+    throw err;
   }
 }
