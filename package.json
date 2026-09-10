@@ -1,0 +1,9 @@
+{
+  "name": "syncboard",
+  "private": true,
+  "type": "module",
+  "description": "Root manifest for the Vercel deployment. The app itself lives in client/ and server/ — this exists so api/index.js is resolved as ESM and so the platform sees a Node project at the repo root.",
+  "engines": {
+    "node": ">=18"
+  }
+}
