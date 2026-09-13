@@ -1,6 +1,6 @@
 # SyncBoard
 
-🔗 **[Live App](https://syncboard-brown.vercel.app)** · 📄 **[API Docs](./server/docs/API.md)**
+🔗 **[Live App](https://syncboard-virid.vercel.app/)** · 📄 **[API Docs](./server/docs/API.md)**
 
 A Kanban-style task management web app — React frontend, Express/Node.js REST API backend, JWT authentication, MongoDB persistence.
 
