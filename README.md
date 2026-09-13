@@ -1,8 +1,21 @@
 # SyncBoard
 
+🔗 **[Live App](https://syncboard-brown.vercel.app)** · 📄 **[API Docs](./server/docs/API.md)**
+
 A Kanban-style task management web app — React frontend, Express/Node.js REST API backend, JWT authentication, MongoDB persistence.
 
 Plan tasks across **To Do**, **In Progress**, and **Done** columns, drag and drop them between stages, and manage everything through a real authenticated API backed by a real database — including offline support and conflict resolution.
+
+## Live Demo
+
+- **Frontend:** [https://syncboard-brown.vercel.app](https://syncboard-brown.vercel.app)
+- **Backend API:** `https://syncboard-pzi2.onrender.com/api`
+
+Demo account:
+- **Email:** `demo@syncboard.dev`
+- **Password:** `password123`
+
+> Note: the backend is hosted on Render's free tier, so the very first request after a period of inactivity may take 30–60 seconds while the service spins back up.
 
 ## Features
 
@@ -19,45 +32,49 @@ Plan tasks across **To Do**, **In Progress**, and **Done** columns, drag and dro
 ## Tech Stack
 
 **Frontend:** React 19, Vite, Tailwind CSS 4, @hello-pangea/dnd (drag-and-drop), PouchDB (`pouchdb-browser`, `pouchdb-find`) for offline caching and sync
+
 **Backend:** Node.js, Express 5, JWT (`jsonwebtoken`), bcrypt (`bcryptjs`)
+
 **Database:** MongoDB Atlas via Mongoose — see `server/docs/API.md` for schema details and the `/stats` aggregation pipeline
 
 ## Project Structure
-collabboard/
-├── client/ # React frontend
-│ ├── src/
-│ │ ├── main.jsx
-│ │ ├── App.jsx
-│ │ ├── api/ # fetch wrappers for the backend (auth, board/tasks)
-│ │ ├── context/AuthContext.jsx
-│ │ ├── components/
-│ │ ├── realtime/socket.js # Socket.IO client
-│ │ ├── offline/ # localDB.js (PouchDB cache/queue), useOnlineStatus.js
-│ │ └── mockData.js # still used for sidebar team info, not tasks
-│ ├── tests/ # Vitest + React Testing Library
-│ ├── Dockerfile # multi-stage build -> nginx
-│ ├── nginx.conf
-│ └── package.json
-├── server/ # Express backend
-│ ├── src/
-│ │ ├── index.js # entry point
-│ │ ├── app.js # Express app setup
-│ │ ├── config/ # env var loading, db.js (MongoDB connection)
-│ │ ├── models/
-│ │ │ ├── schemas/ # userSchema.js, taskSchema.js (Mongoose schemas)
-│ │ │ ├── User.js
-│ │ │ └── Task.js
-│ │ ├── controllers/ # authController.js, taskController.js
-│ │ ├── routes/
-│ │ ├── realtime/io.js # Socket.IO server
-│ │ └── middleware/ # JWT auth check, error handling
-│ ├── tests/ # Jest + Supertest
-│ ├── docs/ # API.md (full API contract), Postman collection
-│ ├── Dockerfile
-│ └── package.json
-├── docker-compose.yml # runs client + server together
-└── .env.example # env vars docker-compose interpolates
 
+```text
+syncboard/
+├── client/                     # React frontend
+│   ├── src/
+│   │   ├── main.jsx
+│   │   ├── App.jsx
+│   │   ├── api/                 # fetch wrappers for the backend (auth, board/tasks)
+│   │   ├── context/AuthContext.jsx
+│   │   ├── components/
+│   │   ├── realtime/socket.js   # Socket.IO client
+│   │   ├── offline/              # localDB.js (PouchDB cache/queue), useOnlineStatus.js
+│   │   └── mockData.js          # still used for sidebar team info, not tasks
+│   ├── tests/                   # Vitest + React Testing Library
+│   ├── Dockerfile               # multi-stage build -> nginx
+│   ├── nginx.conf
+│   └── package.json
+├── server/                      # Express backend
+│   ├── src/
+│   │   ├── index.js             # entry point
+│   │   ├── app.js               # Express app setup
+│   │   ├── config/               # env var loading, db.js (MongoDB connection)
+│   │   ├── models/
+│   │   │   ├── schemas/          # userSchema.js, taskSchema.js (Mongoose schemas)
+│   │   │   ├── User.js
+│   │   │   └── Task.js
+│   │   ├── controllers/         # authController.js, taskController.js
+│   │   ├── routes/
+│   │   ├── realtime/io.js       # Socket.IO server
+│   │   └── middleware/           # JWT auth check, error handling
+│   ├── tests/                    # Jest + Supertest
+│   ├── docs/                     # API.md (full API contract), Postman collection
+│   ├── Dockerfile
+│   └── package.json
+├── docker-compose.yml            # runs client + server together
+└── .env.example                  # env vars docker-compose interpolates
+```
 
 ## Getting Started
 
@@ -69,7 +86,7 @@ collabboard/
 ### 1. Clone the repo
 ```bash
 git clone https://github.com/ShaluniPothuwila/syncboard.git
-cd collabboard
+cd syncboard
 ```
 
 ### 2. Set up and run the backend
@@ -118,9 +135,9 @@ Both servers need to be running at the same time for the app to work. Log in wit
 
 **Frontend** (from `client/`):
 ```bash
-npm run build     # production build
-npm run preview   # preview the production build locally
-npm run lint       # run Oxlint
+npm run build      # production build
+npm run preview    # preview the production build locally
+npm run lint        # run Oxlint
 ```
 
 **Backend** (from `server/`):
