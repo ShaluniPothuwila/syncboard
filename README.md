@@ -9,7 +9,7 @@ Plan tasks across **To Do**, **In Progress**, and **Done** columns, drag and dro
 ## Live Demo
 
 - **Frontend:** [https://syncboard-virid.vercel.app](https://syncboard-virid.vercel.app)
-- **Backend API:** `https://syncboard-pzi2.onrender.com/api`
+- **Backend API:** [https://syncboard-pzi2.onrender.com/api](https://syncboard-pzi2.onrender.com/api)
 
 Demo account:
 - **Email:** `demo@syncboard.dev`
